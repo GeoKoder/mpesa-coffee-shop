@@ -1,5 +1,5 @@
 const config = {
-    apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+    apiUrl: import.meta.env.VITE_API_URL || 'https://mpesa-coffee-shop.onrender.com',
     environment: import.meta.env.MODE,
 };
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { validatePhoneNumber } from "@/utils/validation";
+import mpesaService from "@/services/mpesaService";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -36,20 +37,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, product })
       : phoneNumber;
 
     try {
-      const response = await fetch("http://localhost:3000/pay", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: formattedPhone,
-          amount: product.price
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to initiate payment");
-      }
+      const response = await mpesaService.initiatePayment(formattedPhone, product.price);
 
       toast({
         title: "Payment initiated!",
@@ -58,10 +46,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, product })
       });
       
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Payment failed",
-        description: "Failed to initiate payment. Please try again.",
+        description: error.message || "Failed to initiate payment. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
