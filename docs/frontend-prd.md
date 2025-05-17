@@ -29,7 +29,7 @@
 
 ### 💰 Payment via Modal
 
-* Clicking “**Buy with M-PESA**” opens a **modal**.
+* Clicking "**Buy with M-PESA**" opens a **modal**.
 * Modal includes a form to enter a **Safaricom phone number**.
 * On submission, sends payment request to backend.
 
@@ -57,7 +57,7 @@
 
 1. **User visits the Coffee Kiosk site**.
 2. **Coffee products are displayed** in a grid.
-3. User clicks **“Buy with M-PESA”** on a product.
+3. User clicks **"Buy with M-PESA"** on a product.
 4. A **modal appears** asking for their Safaricom phone number.
 5. User enters a valid number and submits.
 6. App sends a `POST /pay` request to the backend with the product price and phone number.
