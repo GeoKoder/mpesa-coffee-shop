@@ -1,18 +1,17 @@
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import config from '@/config';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: config.apiUrl,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor
+// Add request interceptor for authentication if needed
 api.interceptors.request.use(
   (config) => {
-    // You can add auth tokens here
+    // You can add auth token here if needed
     return config;
   },
   (error) => {
@@ -20,13 +19,21 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle common errors here
-    if (error.response?.status === 401) {
-      // Handle unauthorized
+    // Handle errors globally
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('API Error:', error.response.data);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Network Error:', error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error:', error.message);
     }
     return Promise.reject(error);
   }
