@@ -1,4 +1,4 @@
-# Coffee Kiosk Payment Backend
+# Coffee Kiosk Payment 
 
 A minimalistic Node.js/TypeScript API service for handling M-PESA STK Push payments, designed for the Safaricom sandbox environment.
 
@@ -189,4 +189,3 @@ coffee-backend/
 ---
 
 **Need help?** Open an issue or contact the maintainer. 
->>>>>>> a669e2e (Initial commit with backend/frontend integration)
