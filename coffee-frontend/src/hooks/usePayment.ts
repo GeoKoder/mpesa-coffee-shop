@@ -1,79 +1,68 @@
 import { useState } from 'react';
-import mpesaService from '@/services/mpesaService';
-import { PaymentStatus } from '@/types';
+import { Product } from '@/types';
 
-const usePayment = () => {
-    const [loading, setLoading] = useState(false);
+interface PaymentResponse {
+    CheckoutRequestID: string;
+    status: string;
+    message?: string;
+}
+
+export const usePayment = (product: Product) => {
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [paymentStatus, setPaymentStatus] = useState<PaymentStatus['status'] | null>(null);
     const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
 
-    const initiatePayment = async (phone: string, amount: number) => {
+    const initiatePayment = async () => {
+        setIsLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
-            
-            const response = await mpesaService.initiatePayment(phone, amount);
-            setCheckoutRequestId(response.CheckoutRequestID);
-            setPaymentStatus('pending');
-            
-            // Start polling for payment status
-            pollPaymentStatus(response.CheckoutRequestID);
-            
-            return response;
-        } catch (err: any) {
-            setError(err.message);
-            setPaymentStatus('failed');
-            throw err;
+            const response = await fetch("/api/payment/initiate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    amount: product.price,
+                    phone: "", // This should be collected from the user
+                    productId: product.id,
+                }),
+            });
+
+            const data = await response.json() as PaymentResponse;
+            setCheckoutRequestId(data.CheckoutRequestID);
+            pollPaymentStatus(data.CheckoutRequestID);
+        } catch (err) {
+            setError("Failed to initiate payment. Please try again.");
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     const pollPaymentStatus = async (requestId: string) => {
-        const pollInterval = setInterval(async () => {
-            try {
-                const status = await mpesaService.checkPaymentStatus(requestId);
-                
-                if (status.status === 'completed') {
-                    setPaymentStatus('completed');
-                    clearInterval(pollInterval);
-                } else if (status.status === 'failed') {
-                    setPaymentStatus('failed');
-                    setError(status.message);
-                    clearInterval(pollInterval);
-                }
-            } catch (err: any) {
-                setError(err.message);
-                clearInterval(pollInterval);
-            }
-        }, 5000); // Poll every 5 seconds
+        try {
+            const response = await fetch(`/api/payment/status/${requestId}`);
+            const status = await response.json() as PaymentResponse;
 
-        // Stop polling after 5 minutes
-        setTimeout(() => {
-            clearInterval(pollInterval);
-            if (paymentStatus === 'pending') {
-                setError('Payment status check timed out');
-                setPaymentStatus('timeout');
+            if (status.status === "completed") {
+                // Handle successful payment
+                return true;
+            } else if (status.status === "failed") {
+                setError(status.message || "Payment failed. Please try again.");
+                return false;
             }
-        }, 300000);
-    };
 
-    const resetPayment = () => {
-        setLoading(false);
-        setError(null);
-        setPaymentStatus(null);
-        setCheckoutRequestId(null);
+            // Continue polling if payment is still pending
+            setTimeout(() => pollPaymentStatus(requestId), 5000);
+        } catch (err) {
+            setError("Failed to check payment status. Please try again.");
+            return false;
+        }
     };
 
     return {
-        loading,
-        error,
-        paymentStatus,
-        checkoutRequestId,
         initiatePayment,
-        resetPayment
+        isLoading,
+        error,
+        checkoutRequestId,
     };
-};
-
-export default usePayment; 
+}; 

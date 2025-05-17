@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import usePayment from '@/hooks/usePayment';
+import { usePayment } from '@/hooks/usePayment';
 
 interface PaymentFormProps {
     amount: number;
     onPaymentComplete?: () => void;
+    product: any; // Assuming product is of type any
 }
 
-const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete }) => {
+const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete, product }) => {
     const [phone, setPhone] = useState('');
-    const { loading, error, paymentStatus, initiatePayment } = usePayment();
+    const { isLoading, error, initiatePayment } = usePayment(product);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,7 +22,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete }) 
         }
 
         try {
-            await initiatePayment(phone, amount);
+            await initiatePayment();
             toast.info('Please check your phone for the M-PESA prompt');
         } catch (err: any) {
             toast.error(err.message);
@@ -29,7 +30,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete }) 
     };
 
     const renderStatus = () => {
-        switch (paymentStatus) {
+        switch (error) {
             case 'pending':
                 return (
                     <div className="text-yellow-600">
@@ -79,7 +80,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete }) 
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="2547XXXXXXXX"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        disabled={loading || paymentStatus === 'pending'}
+                        disabled={isLoading}
                         required
                     />
                     <p className="mt-1 text-sm text-gray-500">
@@ -98,14 +99,14 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ amount, onPaymentComplete }) 
 
                 <button
                     type="submit"
-                    disabled={loading || paymentStatus === 'pending'}
+                    disabled={isLoading}
                     className={`w-full py-2 px-4 rounded-md text-white font-medium
-                        ${loading || paymentStatus === 'pending'
+                        ${isLoading
                             ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700'
                         }`}
                 >
-                    {loading ? 'Processing...' : 'Pay with M-PESA'}
+                    {isLoading ? 'Processing...' : 'Pay with M-PESA'}
                 </button>
             </form>
 

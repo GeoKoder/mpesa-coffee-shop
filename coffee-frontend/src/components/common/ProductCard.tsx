@@ -1,35 +1,30 @@
-
-import React from "react";
-import { Product } from "@/data/products";
-import { Button } from "@/components/ui/button";
+import { Product } from "@/types";
 
 interface ProductCardProps {
   product: Product;
-  onBuy: (product: Product) => void;
+  onClick: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onBuy }: ProductCardProps) => {
+const ProductCard = ({ product, onClick }: ProductCardProps) => {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      <div className="h-48 overflow-hidden">
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
-        />
-      </div>
-      <div className="p-5">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
-          <span className="text-primary font-bold">KES {product.price}</span>
-        </div>
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => onClick(product)}
+    >
+      <img
+        src={product.image}
+        alt={product.name}
+        className="w-full h-48 object-cover"
+      />
+      <div className="p-4">
+        <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
         <p className="text-gray-600 text-sm mb-4">{product.description}</p>
-        <Button 
-          onClick={() => onBuy(product)} 
-          className="w-full bg-primary hover:bg-primary-hover text-white"
-        >
-          Buy with M-PESA
-        </Button>
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+          <span className={`text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
+            {product.inStock ? 'In Stock' : 'Out of Stock'}
+          </span>
+        </div>
       </div>
     </div>
   );

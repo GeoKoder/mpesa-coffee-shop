@@ -1,5 +1,5 @@
 export interface Product {
-    id: string;
+    id: number;
     name: string;
     description: string;
     price: number;
@@ -11,7 +11,6 @@ export interface Product {
 export interface PaymentStatus {
     status: 'pending' | 'completed' | 'failed' | 'timeout';
     message?: string;
-    transactionId?: string;
 }
 
 export interface PaymentResponse {
